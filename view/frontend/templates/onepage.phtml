@@ -1,0 +1,251 @@
+<?php
+/**
+ * FastMagento Checkout — instant shell template.
+ *
+ * Two rendering paths:
+ *   - DISABLED (kill-switch): render the exact stock Magento onepage markup, incl. the
+ *     inline window.checkoutConfig. Guarantees ?fastcheckout=0 / toggle-off == stock.
+ *   - ENABLED: render a static, immediately-typeable contact+shipping form (real inputs,
+ *     store-static country/region), plus mount points for the shipping-method list, order
+ *     summary and the native Knockout payment "island". window.checkoutConfig is NOT inlined
+ *     here — it is fetched async by the fastCheckout widget so this shell can be cached.
+ *
+ * @var \Magento\Checkout\Block\Onepage $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \ParkkTech\FastMagentoCheckout\ViewModel\CheckoutBoot $fastCheckout */
+$fastCheckout = $block->getFastCheckout();
+/** @var \ParkkTech\FastMagentoCheckout\ViewModel\AddressForm $addressForm */
+$addressForm = $block->getAddressForm();
+?>
+<?php if (!$fastCheckout || !$fastCheckout->isEnabled()): ?>
+    <?php /* ---- STOCK PATH (kill-switch): identical to Magento_Checkout::onepage.phtml ---- */ ?>
+    <div id="checkout" data-bind="scope:'checkout'" class="checkout-container">
+        <div id="checkout-loader" data-role="checkout-loader" class="loading-mask" data-mage-init='{"checkoutLoader": {}}'>
+            <div class="loader">
+                <img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>"
+                     alt="<?= $block->escapeHtmlAttr(__('Loading...')) ?>">
+            </div>
+        </div>
+        <?= /* @noEscape */ $secureRenderer->renderStyleAsTag("position: absolute;", "#checkout-loader img") ?>
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <script type="text/x-magento-init">
+            {
+                "#checkout": {
+                    "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+                }
+            }
+        </script>
+        <?php $serializedCheckoutConfig = /* @noEscape */ $block->getSerializedCheckoutConfig();
+        $scriptString = <<<script
+            window.checkoutConfig = {$serializedCheckoutConfig};
+            window.isCustomerLoggedIn = window.checkoutConfig.isCustomerLoggedIn;
+            window.customerData = window.checkoutConfig.customerData;
+script;
+        ?>
+        <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
+        <?php $scriptString = <<<script
+            require([
+                'mage/url',
+                'Magento_Ui/js/block-loader'
+            ], function(url, blockLoader) {
+                blockLoader("{$block->escapeJs($block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')))}");
+                return url.setBaseUrl('{$block->escapeJs($block->escapeUrl($block->getBaseUrl()))}');
+            })
+script;
+        ?>
+        <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
+    </div>
+    <?php return; ?>
+<?php endif; ?>
+
+<?php /* ================= FAST PATH: static, cacheable, instantly interactive ================= */ ?>
+<?php
+$defaultCountry = $addressForm->getDefaultCountry();
+$widgetOptions = [
+    'configUrl'    => $fastCheckout->getConfigUrl(),
+    'fallbackUrl'  => $fastCheckout->getFallbackUrl(),
+    'baseUrl'      => $block->getBaseUrl(),
+    'loaderImg'    => $block->getViewFileUrl('images/loader-1.gif'),
+    'defaultCountry' => $defaultCountry,
+    'regionMap'    => $addressForm->getRegionMap(),
+    'requiredRegionCountries' => array_values($addressForm->getCountriesWithRequiredRegion()),
+    'showOptionalRegion' => $addressForm->isShowNonRequiredRegion(),
+    'addressAutocomplete' => $fastCheckout->isAddressAutocompleteEnabled(),
+    'googleMapsApiKey' => $fastCheckout->getGoogleMapsApiKey(),
+    'maxSummaryItems' => $fastCheckout->getMaxItemsDisplayCount(),
+];
+?>
+<?php
+/*
+ * Inline a STATIC, non-private checkoutConfig skeleton before anything runs. Third-party
+ * modules (e.g. Stripe's minicart components) require checkout models like quote.js on every
+ * page; those read window.checkoutConfig at eval and throw if it is entirely undefined. The
+ * skeleton is all-empty/static (safe to cache); the real per-quote data is merged in later by
+ * config-loader, preserving object identity so eager modules see the hydrated values.
+ */
+$skeleton = <<<script
+    window.checkoutConfig = window.checkoutConfig || {
+        quoteData: {},
+        quoteItemData: [],
+        totalsData: {},
+        paymentMethods: [],
+        priceFormat: {},
+        basePriceFormat: {},
+        storeCode: ''
+    };
+script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $skeleton, false) ?>
+<div id="checkout"
+     class="checkout-container fastcheckout"
+     data-mage-init='<?= $block->escapeHtmlAttr(json_encode(['ParkkTech_FastMagentoCheckout/js/checkout' => $widgetOptions])) ?>'>
+
+    <div class="fastcheckout-header">
+        <h1 class="fastcheckout-title"><?= $escaper->escapeHtml(__('Checkout')) ?></h1>
+        <span class="fastcheckout-secure">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M12 1 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-4Zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6Z"/>
+            </svg>
+            <?= $escaper->escapeHtml(__('Secure Checkout')) ?>
+        </span>
+    </div>
+
+    <div class="fastcheckout-columns">
+        <div class="fastcheckout-main">
+
+            <div class="fastcheckout-messages" data-role="fastcheckout-messages"></div>
+
+            <section class="fastcheckout-step" data-role="fastcheckout-contact">
+                <h2 class="fastcheckout-step-title"><?= $escaper->escapeHtml(__('Contact')) ?></h2>
+                <?php /*
+                    The email MUST live inside a form[data-role=email-with-possible-login] with an
+                    input[name=username]: the stock place-order validator
+                    (Magento_Checkout/js/model/customer-email-validator) always runs
+                    $('form[data-role=email-with-possible-login] input[name=username]').valid()
+                    for guests. Without that form the selector matches nothing and .valid()
+                    throws "Cannot read properties of undefined (reading 'form')", blocking Place
+                    Order. Reproducing the structure (+ data-validate) satisfies it. Submit is
+                    prevented in JS (Enter must not reload the page).
+                */ ?>
+                <form class="form form-login fastcheckout-email-form" data-role="email-with-possible-login"
+                      method="post" novalidate>
+                    <div class="field field-email">
+                        <label for="fastcheckout-email"><?= $escaper->escapeHtml(__('Email Address')) ?></label>
+                        <input type="email" id="fastcheckout-email" name="username" autocomplete="email"
+                               data-role="fc-email"
+                               data-validate='{"required":true, "validate-email":true}'
+                               placeholder="<?= $escaper->escapeHtmlAttr(__('you@example.com')) ?>"/>
+                        <div class="fastcheckout-login-hint" data-role="fc-login-hint" hidden>
+                            <?= $escaper->escapeHtml(__('You already have an account. Sign in for a faster checkout.')) ?>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <section class="fastcheckout-step" data-role="fastcheckout-shipping-address">
+                <h2 class="fastcheckout-step-title" data-billing-label="<?= $escaper->escapeHtmlAttr(__('Billing Address')) ?>"><?= $escaper->escapeHtml(__('Shipping Address')) ?></h2>
+                <form data-role="fc-address-form" novalidate>
+                    <div class="fastcheckout-row">
+                        <div class="field field-firstname">
+                            <label for="fc-firstname"><?= $escaper->escapeHtml(__('First Name')) ?></label>
+                            <input type="text" id="fc-firstname" name="firstname" autocomplete="given-name"/>
+                        </div>
+                        <div class="field field-lastname">
+                            <label for="fc-lastname"><?= $escaper->escapeHtml(__('Last Name')) ?></label>
+                            <input type="text" id="fc-lastname" name="lastname" autocomplete="family-name"/>
+                        </div>
+                    </div>
+                    <div class="field field-company">
+                        <label for="fc-company"><?= $escaper->escapeHtml(__('Company')) ?>
+                            <span class="optional">(<?= $escaper->escapeHtml(__('optional')) ?>)</span></label>
+                        <input type="text" id="fc-company" name="company" autocomplete="organization"/>
+                    </div>
+                    <div class="field field-street">
+                        <label for="fc-street0"><?= $escaper->escapeHtml(__('Street Address')) ?></label>
+                        <input type="text" id="fc-street0" name="street[0]" autocomplete="address-line1"/>
+                        <input type="text" id="fc-street1" name="street[1]" autocomplete="address-line2"
+                               placeholder="<?= $escaper->escapeHtmlAttr(__('Apartment, suite, etc. (optional)')) ?>"/>
+                    </div>
+                    <div class="fastcheckout-row">
+                        <div class="field field-city">
+                            <label for="fc-city"><?= $escaper->escapeHtml(__('City')) ?></label>
+                            <input type="text" id="fc-city" name="city" autocomplete="address-level2"/>
+                        </div>
+                        <div class="field field-region">
+                            <label for="fc-region"><?= $escaper->escapeHtml(__('State/Province')) ?></label>
+                            <select id="fc-region-id" name="region_id" data-role="fc-region-select" hidden></select>
+                            <input type="text" id="fc-region" name="region" data-role="fc-region-input"
+                                   autocomplete="address-level1"/>
+                        </div>
+                    </div>
+                    <div class="fastcheckout-row">
+                        <div class="field field-postcode">
+                            <label for="fc-postcode"><?= $escaper->escapeHtml(__('Zip/Postal Code')) ?></label>
+                            <input type="text" id="fc-postcode" name="postcode" autocomplete="postal-code"/>
+                        </div>
+                        <div class="field field-country">
+                            <label for="fc-country"><?= $escaper->escapeHtml(__('Country')) ?></label>
+                            <select id="fc-country" name="country_id" data-role="fc-country" autocomplete="country">
+                                <?php foreach ($addressForm->getCountryOptions() as $country): ?>
+                                    <?php if (empty($country['value'])) { continue; } ?>
+                                    <option value="<?= $escaper->escapeHtmlAttr($country['value']) ?>"
+                                        <?= $country['value'] === $defaultCountry ? 'selected' : '' ?>>
+                                        <?= $escaper->escapeHtml($country['label']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field field-telephone">
+                        <label for="fc-telephone"><?= $escaper->escapeHtml(__('Phone Number')) ?></label>
+                        <input type="tel" id="fc-telephone" name="telephone" autocomplete="tel"/>
+                    </div>
+                </form>
+            </section>
+
+            <section class="fastcheckout-step" data-role="fastcheckout-shipping-methods">
+                <h2 class="fastcheckout-step-title"><?= $escaper->escapeHtml(__('Shipping Method')) ?></h2>
+                <div data-role="fc-shipping-methods" class="fastcheckout-shipping-methods">
+                    <p class="fastcheckout-hint" data-role="fc-shipping-hint">
+                        <?= $escaper->escapeHtml(__('Enter your address above to see delivery options.')) ?>
+                    </p>
+                </div>
+            </section>
+
+            <section class="fastcheckout-step" data-role="fastcheckout-payment">
+                <h2 class="fastcheckout-step-title"><?= $escaper->escapeHtml(__('Payment')) ?></h2>
+                <?php /*
+                    The native Knockout payment subtree mounts here. The scope name preserves the
+                    stock registry path so payments-list' absolute config.deps resolve unchanged.
+                */ ?>
+                <p class="fastcheckout-hint" data-role="fc-payment-hint">
+                    <?= $escaper->escapeHtml(__('Complete your details above to choose how to pay.')) ?>
+                </p>
+                <div id="fastcheckout-payment"
+                     data-role="fc-payment-island"
+                     data-bind="scope:'checkout.steps.billing-step.payment'">
+                    <!-- ko template: getTemplate() --><!-- /ko -->
+                </div>
+            </section>
+        </div>
+
+        <aside class="fastcheckout-sidebar" data-role="fastcheckout-summary">
+            <h2 class="fastcheckout-step-title"><?= $escaper->escapeHtml(__('Order Summary')) ?></h2>
+            <div data-role="fc-summary" class="fastcheckout-summary"></div>
+        </aside>
+    </div>
+</div>
+
+<?php
+/*
+ * Emit the store-STATIC jsLayout inline (safe to cache — identical for everyone) so the
+ * payment island can boot without a second round-trip. The private window.checkoutConfig is
+ * deliberately NOT here; the fastCheckout widget fetches it from getConfigUrl().
+ */
+$jsLayout = /* @noEscape */ $block->getJsLayout();
+$scriptString = "window.fastCheckoutJsLayout = {$jsLayout};";
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>

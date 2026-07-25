@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="parkktech" translate="label" sortOrder="400">
+            <label>ParkkTech</label>
+        </tab>
+        <section id="fastmagentocheckout" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>FastMagento Checkout</label>
+            <tab>parkktech</tab>
+            <resource>ParkkTech_FastMagentoCheckout::config</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Checkout Style</label>
+                    <source_model>ParkkTech\FastMagentoCheckout\Model\Config\Source\CheckoutStyle</source_model>
+                    <comment><![CDATA[<b>Default (2-Step)</b> = the stock Magento Knockout checkout (shipping step, then payment). <b>Single-Page Instant</b> = the fast checkout that paints the form immediately and populates data in the background. You can always force the stock checkout on a single request with <b>?fastcheckout=0</b>.]]></comment>
+                </field>
+                <field id="link_guest_orders" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Link Guest Orders to Existing Accounts</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[When a guest checks out with an email that already belongs to a registered account (same website), attach the order to that account so it appears in the customer's order history. On by default. Note: this associates the order by email match alone, without the shopper logging in.]]></comment>
+                </field>
+            </group>
+            <group id="address_autocomplete" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Address Autocomplete</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Google Places Autocomplete</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Suggest and auto-fill the shipping address from Google Places as the shopper types the street. Requires a Google Maps JavaScript API key with the <b>Places</b> library enabled. The module's CSP whitelist already allows the Google Maps hosts.]]></comment>
+                </field>
+                <field id="google_api_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Maps API Key</label>
+                    <comment><![CDATA[A Google Maps JavaScript API key with the <b>Places</b> library enabled. Stored in plain text on purpose — a client-side Maps key is served to the browser in the script URL, so it is not a secret (secure it with HTTP-referrer + API restrictions in Google Cloud instead). Leave blank to reuse the Amasty Address Autocomplete key (<i>amasty_address_autocomplete/general/google_api_key</i>) if that extension is installed.]]></comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

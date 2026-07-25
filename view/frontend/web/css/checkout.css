@@ -1,0 +1,715 @@
+/**
+ * FastMagento Checkout — instant shell styling.
+ *
+ * Focused, high-trust checkout (not landing-page flashy). Palette: slate primary + action
+ * red CTA on a light surface, matched to the DIY Offroad brand. Styles both the static
+ * instant form and the native Knockout payment island so they read as one design.
+ */
+
+.checkout-container.fastcheckout {
+    --fc-primary: #1e293b;
+    --fc-primary-2: #334155;
+    --fc-accent: #16a34a;          /* go-green — proceed/confirm, not stop-red */
+    --fc-accent-hover: #15803d;
+    --fc-accent-tint: #f0fdf4;     /* light green wash for selected states */
+    --fc-bg: #f8fafc;
+    --fc-surface: #ffffff;
+    --fc-fg: #0f172a;
+    --fc-muted-fg: #64748b;
+    --fc-border: #e2e8f0;
+    --fc-muted: #f1f5f9;
+    --fc-radius: 10px;
+    --fc-focus: rgba(22, 163, 74, 0.2);
+
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+    color: var(--fc-fg);
+    font-size: 16px;
+    line-height: 1.5;
+    counter-reset: fcstep;
+}
+
+/* The theme sets display on sections, which overrides the [hidden] UA rule — force it. */
+.fastcheckout [hidden] { display: none !important; }
+
+/* ---- header ---- */
+
+.fastcheckout-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 0 24px;
+    border-bottom: 1px solid var(--fc-border);
+    margin-bottom: 28px;
+}
+
+.fastcheckout-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--fc-primary);
+}
+
+.fastcheckout-secure {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #15803d;
+}
+
+.fastcheckout-secure svg { color: #16a34a; }
+
+/* ---- columns ---- */
+
+.fastcheckout-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    align-items: flex-start;
+}
+
+.fastcheckout-main {
+    flex: 1 1 540px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ---- step cards ---- */
+
+.fastcheckout-step {
+    background: var(--fc-surface);
+    border: 1px solid var(--fc-border);
+    border-radius: var(--fc-radius);
+    padding: 22px 24px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.fastcheckout-main .fastcheckout-step-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--fc-primary);
+    margin: 0 0 18px;
+}
+
+/* Auto-number visible steps (hidden ones don't increment). */
+.fastcheckout-main .fastcheckout-step:not([hidden]) .fastcheckout-step-title::before {
+    counter-increment: fcstep;
+    content: counter(fcstep);
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--fc-primary);
+    color: #fff;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---- fields ---- */
+
+.fastcheckout .field { margin-bottom: 14px; }
+.fastcheckout .field:last-child { margin-bottom: 0; }
+
+.fastcheckout .field > label {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--fc-primary-2);
+    margin-bottom: 6px;
+}
+
+.fastcheckout .field .optional { font-weight: 400; color: var(--fc-muted-fg); }
+
+.fastcheckout input[type="text"],
+.fastcheckout input[type="email"],
+.fastcheckout input[type="tel"],
+.fastcheckout select,
+#fastcheckout-payment input[type="text"],
+#fastcheckout-payment input[type="email"],
+#fastcheckout-payment input[type="tel"],
+#fastcheckout-payment input[type="password"],
+#fastcheckout-payment select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 46px;
+    padding: 0 13px;
+    font-size: 16px; /* prevents iOS zoom */
+    color: var(--fc-fg);
+    border: 1px solid var(--fc-border);
+    border-radius: 8px;
+    background: var(--fc-surface);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fastcheckout input::placeholder { color: #94a3b8; }
+
+.fastcheckout input:focus,
+.fastcheckout select:focus,
+#fastcheckout-payment input:focus,
+#fastcheckout-payment select:focus {
+    outline: none;
+    border-color: var(--fc-accent);
+    box-shadow: 0 0 0 3px var(--fc-focus);
+}
+
+/* Empty required field the shopper skipped — error red (this is an error, unlike the CTA). */
+.fastcheckout input.fc-invalid,
+.fastcheckout select.fc-invalid {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+.fastcheckout input.fc-invalid:focus,
+.fastcheckout select.fc-invalid:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.22);
+}
+
+.fastcheckout .field-street input + input { margin-top: 8px; }
+
+/* Saved-address carousel (logged-in shoppers) — a horizontal strip of selectable address cards. */
+.fastcheckout .fc-address-saved {
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px dashed var(--fc-border);
+}
+.fc-address-saved-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.fc-address-saved-title { font-size: 17px; font-weight: 600; color: var(--fc-primary-2); }
+.fc-address-saved-hint { font-size: 14px; color: var(--fc-muted-fg); white-space: nowrap; }
+.fc-address-carousel { display: flex; align-items: stretch; gap: 8px; }
+.fc-address-track {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 3px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.fc-address-track::-webkit-scrollbar { display: none; }
+.fc-address-card {
+    scroll-snap-align: start;
+    flex: 0 0 220px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px;
+    border: 1.5px solid var(--fc-border);
+    border-radius: 10px;
+    background: var(--fc-surface);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.fc-address-card:hover { border-color: #cbd5e1; }
+.fc-address-card.is-selected {
+    border-color: var(--fc-accent);
+    box-shadow: 0 0 0 3px var(--fc-focus);
+}
+.fc-address-card-badge {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--fc-accent-hover);
+    background: var(--fc-accent-tint);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 2px;
+}
+.fc-address-card-name { font-weight: 700; color: var(--fc-fg); font-size: 15px; }
+.fc-address-card-line { font-size: 14px; color: var(--fc-muted-fg); line-height: 1.35; }
+.fc-address-card-company { font-style: italic; }
+.fc-address-card-new {
+    align-items: center;
+    justify-content: center;
+    border-style: dashed;
+    color: var(--fc-muted-fg);
+    min-height: 104px;
+}
+.fc-address-card-new .fc-address-card-plus { font-size: 26px; line-height: 1; }
+.fc-address-nav {
+    flex: 0 0 auto;
+    width: 34px;
+    align-self: stretch;
+    border: 1px solid var(--fc-border);
+    border-radius: 8px;
+    background: var(--fc-surface);
+    color: var(--fc-primary);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+.fc-address-nav:hover:not(:disabled) { background: var(--fc-muted); }
+.fc-address-nav:disabled { opacity: 0.35; cursor: default; }
+
+@media (max-width: 560px) {
+    .fc-address-card { flex-basis: 200px; }
+    .fc-address-nav { display: none; }
+}
+
+/* Google Places autocomplete dropdown (appended to <body>, so styled globally but lightly). */
+.pac-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+    margin-top: 4px;
+    font-family: inherit;
+    z-index: 100000;
+}
+.pac-item {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #334155;
+    cursor: pointer;
+    border-top: 1px solid #f1f5f9;
+}
+.pac-item:hover,
+.pac-item-selected { background: #f0fdf4; }
+.pac-item-query { font-size: 15px; color: #0f172a; }
+.pac-matched { font-weight: 700; }
+.pac-icon { display: none; }
+.hdpi.pac-logo::after { opacity: 0.4; }
+
+.fastcheckout-row { display: flex; gap: 14px; }
+.fastcheckout-row > .field { flex: 1 1 0; min-width: 0; }
+
+.fastcheckout-login-hint { margin-top: 6px; font-size: 14px; color: var(--fc-accent); }
+.fastcheckout-hint { color: var(--fc-muted-fg); font-size: 17px; margin: 0; }
+
+/* ---- shipping methods ---- */
+
+.fastcheckout-shipping-methods.fc-rates-loading { opacity: 0.55; }
+
+.fastcheckout .fc-rate {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--fc-border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.fastcheckout .fc-rate:last-child { margin-bottom: 0; }
+.fastcheckout .fc-rate:hover { border-color: #cbd5e1; background: var(--fc-muted); }
+.fastcheckout .fc-rate:has(input:checked) {
+    border-color: var(--fc-accent);
+    background: var(--fc-accent-tint);
+}
+.fastcheckout .fc-rate input { accent-color: var(--fc-accent); width: 18px; height: 18px; }
+.fastcheckout .fc-rate-title { flex: 1 1 auto; font-weight: 500; }
+.fastcheckout .fc-rate-price { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---- order summary ---- */
+
+.fastcheckout-sidebar {
+    flex: 0 1 380px;
+    position: sticky;
+    top: 20px;
+    background: var(--fc-surface);
+    border: 1px solid var(--fc-border);
+    border-radius: var(--fc-radius);
+    padding: 22px 24px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.fastcheckout-sidebar .fastcheckout-step-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--fc-primary);
+    margin: 0 0 16px;
+}
+
+.fc-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--fc-border);
+    font-size: 15px;
+}
+.fc-summary-thumb {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 72px;
+    border: 1px solid var(--fc-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--fc-muted);
+}
+.fc-summary-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.fc-summary-qty {
+    flex: 0 0 auto;
+    min-width: 24px;
+    color: var(--fc-muted-fg);
+    font-variant-numeric: tabular-nums;
+}
+.fc-summary-name { flex: 1 1 auto; }
+.fc-summary-price { flex: 0 0 auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+.fc-summary-price .price { font-weight: 600; }
+
+/* When the items list is capped (JS sets max-height inline), scroll it internally so the
+   summary never runs past the payment form. A thin scrollbar + fade hint that there's more. */
+.fc-summary-items.fc-summary-scroll {
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--fc-border) transparent;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent);
+}
+.fc-summary-items.fc-summary-scroll::-webkit-scrollbar { width: 8px; }
+.fc-summary-items.fc-summary-scroll::-webkit-scrollbar-thumb {
+    background: var(--fc-border);
+    border-radius: 4px;
+}
+.fc-summary-items.fc-summary-scroll::-webkit-scrollbar-track { background: transparent; }
+
+.fc-summary-totals { margin-top: 16px; }
+.fc-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    color: var(--fc-primary-2);
+}
+.fc-total-row .fc-total-value { font-variant-numeric: tabular-nums; }
+.fc-total-row.fc-total-strong {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--fc-fg);
+    border-top: 2px solid var(--fc-border);
+    margin-top: 8px;
+    padding-top: 14px;
+}
+
+/* ================= native Knockout payment island ================= */
+
+#fastcheckout-payment { min-height: 40px; }
+
+/* Our single-page layout never drives the stock step navigator, so the payment area's KO
+   `fadeVisible: isVisible` binding leaves the whole step — and its intermediate KO wrappers,
+   some of which have no stable class hook — inline-hidden (KO also won't render method
+   children while hidden). Force every inline-hidden node visible with a deliberately LOW
+   specificity (#id + [attr] only), then re-hide the specific pieces that must stay hidden with
+   higher-specificity rules so those always win the cascade. Do NOT raise this selector's
+   specificity (e.g. by adding :not()) — it would start out-specifying the re-hides below and
+   re-expose the discount panel / "no methods" message. */
+#fastcheckout-payment [style*="display: none"],
+#fastcheckout-payment [style*="display:none"] {
+    display: block !important;
+}
+/* Collapsed/inactive content keeps its own open-close behaviour (out-specifies the force): */
+#fastcheckout-payment .payment-method:not(._active) .payment-method-content,   /* collapsed method */
+#fastcheckout-payment .payment-option:not(._active) .payment-option-content {  /* collapsed discount */
+    display: none !important;
+}
+/* Billing form while "same as shipping" is checked (only the summary should show). */
+#fastcheckout-payment .checkout-billing-address:has(input[type="checkbox"]:checked) form,
+#fastcheckout-payment .checkout-billing-address:has(input[type="checkbox"]:checked) fieldset {
+    display: none !important;
+}
+/* HTTPS-only express-checkout elements never take over the payment area on http (these come
+   after the force in source order, so they win the specificity tie). */
+#fastcheckout-payment [data-bind*="isExpressCheckoutElementSupported"],
+#fastcheckout-payment .payment-method-braintree.express-checkout,
+#fastcheckout-payment .stripe-express-checkout {
+    display: none !important;
+}
+/* Stray "No Payment method available." — KO shows this whenever the express/virtual group
+   reports empty even though real methods exist. Stock node is `.no-quotes-block`; hide it once
+   at least one real method has rendered. */
+#fastcheckout-payment:has(.payment-method-title) .no-quotes-block {
+    display: none !important;
+}
+/* Hide the "choose how to pay" hint once real methods are present. */
+[data-role="fastcheckout-payment"]:has(#fastcheckout-payment .payment-method-title) [data-role="fc-payment-hint"] {
+    display: none !important;
+}
+
+/* The payment component renders its own "Payment Method" heading — redundant with our
+   numbered "Payment" step title, so hide it. */
+#fastcheckout-payment .step-title { display: none; }
+
+/* Reset the payments list to unstyled rows (kill stray list markers/bullets). */
+#fastcheckout-payment .payment-methods,
+#fastcheckout-payment .payment-group,
+#fastcheckout-payment .items.payment-methods { margin: 0; padding: 0; }
+#fastcheckout-payment ul,
+#fastcheckout-payment ol,
+#fastcheckout-payment li,
+#fastcheckout-payment .payment-group,
+#fastcheckout-payment .payment-method {
+    list-style: none !important;
+    display: block;
+}
+#fastcheckout-payment .payment-method::marker,
+#fastcheckout-payment .payment-group::marker { content: none; }
+
+/* Each payment method as a selectable card. */
+#fastcheckout-payment .payment-method {
+    border: 1.5px solid var(--fc-border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+}
+#fastcheckout-payment .payment-method:hover { border-color: #cbd5e1; }
+#fastcheckout-payment .payment-method._active { border-color: var(--fc-accent); }
+
+#fastcheckout-payment .payment-method-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 15px 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+#fastcheckout-payment .payment-method._active .payment-method-title { background: var(--fc-accent-tint); }
+#fastcheckout-payment .payment-method-title input[type="radio"] {
+    accent-color: var(--fc-accent);
+    width: 18px; height: 18px; margin: 0;
+}
+#fastcheckout-payment .payment-method-title label { margin: 0; font-weight: 600; cursor: pointer; }
+#fastcheckout-payment .payment-icon { vertical-align: middle; }
+
+#fastcheckout-payment .payment-method-content {
+    padding: 4px 16px 18px;
+    border-top: 1px solid var(--fc-border);
+}
+#fastcheckout-payment .payment-method:not(._active) .payment-method-content { display: none; }
+
+/* Native shared billing section (physical carts): carries the "My billing and shipping
+   address are the same" toggle + a form for a different billing address. Hidden for virtual
+   carts, where the instant form above already collected the billing address. */
+.fastcheckout.fc-virtual #fastcheckout-payment .checkout-billing-address { display: none !important; }
+
+#fastcheckout-payment .checkout-billing-address { margin: 0 0 6px; }
+#fastcheckout-payment .billing-address-same-as-shipping-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 12px;
+    font-weight: 500;
+}
+#fastcheckout-payment .billing-address-same-as-shipping-block input[type="checkbox"] {
+    accent-color: var(--fc-accent);
+    width: 16px; height: 16px; margin: 0;
+}
+#fastcheckout-payment .billing-address-details {
+    font-size: 14px;
+    color: var(--fc-muted-fg);
+    line-height: 1.5;
+    padding: 8px 0;
+}
+#fastcheckout-payment .checkout-billing-address .field { margin-bottom: 12px; }
+#fastcheckout-payment .checkout-billing-address .field > label {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--fc-primary-2);
+    margin-bottom: 6px;
+}
+
+/* Place Order — the single primary action, in action red, full width. */
+#fastcheckout-payment .actions-toolbar { margin-top: 16px; }
+#fastcheckout-payment .actions-toolbar .primary { display: block; width: 100%; }
+#fastcheckout-payment button.action.checkout {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 20px;
+    background: var(--fc-accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+#fastcheckout-payment button.action.checkout:hover:not([disabled]):not(.disabled) {
+    background: var(--fc-accent-hover);
+}
+#fastcheckout-payment button.action.checkout[disabled],
+#fastcheckout-payment button.action.checkout.disabled {
+    background: #cbd5e1;
+    color: #f8fafc;
+    cursor: not-allowed;
+}
+
+/* Secondary buttons (Update/Cancel/Edit inside billing) stay subordinate. */
+#fastcheckout-payment .action-update,
+#fastcheckout-payment .action-cancel,
+#fastcheckout-payment .action-edit-address {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 7px;
+    border: 1px solid var(--fc-border);
+    background: var(--fc-surface);
+    font-weight: 600;
+    cursor: pointer;
+}
+#fastcheckout-payment .action-update { border-color: var(--fc-primary); color: var(--fc-primary); }
+
+/* ---- discount code (Apply Discount Code) ----
+   Rendered by Magento_SalesRule payment/discount.html inside the payment island's afterMethods
+   region: .payment-option._collapsible.discount-code > title (toggle) + content (form). Styled
+   as its own card below the methods; the collapsible adds `_active` when open. */
+#fastcheckout-payment .payment-option.discount-code {
+    border: 1px solid var(--fc-border);
+    border-radius: 8px;
+    margin-top: 14px;
+    background: var(--fc-surface);
+    overflow: hidden;
+}
+#fastcheckout-payment .payment-option-title {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+#fastcheckout-payment .payment-option-title .action-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 14px 16px;
+    color: var(--fc-primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+/* Chevron that rotates open when the section is active. */
+#fastcheckout-payment .payment-option-title .action-toggle::after {
+    content: "";
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--fc-muted-fg);
+    border-bottom: 2px solid var(--fc-muted-fg);
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+}
+#fastcheckout-payment .payment-option._active .payment-option-title .action-toggle::after {
+    transform: rotate(-135deg);
+}
+#fastcheckout-payment .payment-option-content { padding: 0 16px 16px; }
+/* The "Enter discount code" label duplicates the input placeholder — keep it for screen
+   readers but hide it visually so the input + Apply button sit on one clean aligned row. */
+#fastcheckout-payment .payment-option-content .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+/* Lay the discount input and Apply/Cancel button out inline, same height, top-aligned. */
+#fastcheckout-payment #discount-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+#fastcheckout-payment .payment-option-inner {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+#fastcheckout-payment .payment-option-inner .field,
+#fastcheckout-payment .payment-option-inner .control { margin: 0; }
+#fastcheckout-payment .payment-option-content .actions-toolbar {
+    /* flex-basis:auto resolves to ~0 here (a Luma width rule wins), so pin the toolbar to its
+       content width with min-width:max-content — the button can never be squeezed out of the
+       card, and the input side (flex-shrink:1) gives up the space instead. */
+    flex: 0 0 auto;
+    min-width: -moz-max-content;
+    min-width: max-content;
+    margin: 0;
+    /* display:flex neutralises Luma's float on .primary. */
+    display: flex;
+    align-items: stretch;
+}
+#fastcheckout-payment .payment-option-content .actions-toolbar .primary {
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    float: none;
+    width: auto;
+}
+#fastcheckout-payment .payment-option-content .actions-toolbar .action {
+    float: none;
+    width: auto;
+}
+#fastcheckout-payment .action-apply,
+#fastcheckout-payment .action-cancel {
+    height: 46px;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+#fastcheckout-payment .action-apply {
+    background: var(--fc-primary);
+    color: #fff;
+}
+#fastcheckout-payment .action-apply:hover { background: var(--fc-primary-2); }
+#fastcheckout-payment .action-cancel {
+    background: var(--fc-surface);
+    border-color: var(--fc-border);
+    color: var(--fc-primary);
+}
+#fastcheckout-payment .action-cancel:hover { background: var(--fc-muted); }
+
+/* Loading mask over the island while an action is in flight. */
+#fastcheckout-payment .loading-mask { border-radius: 8px; }
+
+/* ---- responsive ---- */
+
+@media (max-width: 860px) {
+    .fastcheckout-columns { flex-direction: column-reverse; gap: 20px; }
+    .fastcheckout-sidebar { position: static; width: 100%; box-sizing: border-box; }
+}
+
+@media (max-width: 560px) {
+    .fastcheckout-row { flex-direction: column; gap: 0; }
+    .fastcheckout-step { padding: 18px 16px; }
+    .fastcheckout-title { font-size: 26px; }
+}
+
+/* ---- reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    .fastcheckout *,
+    #fastcheckout-payment * { transition: none !important; }
+}

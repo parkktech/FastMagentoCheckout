@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Invalidate the fastcheckout-customer section (address book in localStorage) only when the
+ * customer's identity or addresses actually change — login/logout, address add/edit/delete, and
+ * after an order is placed. Between these events the section is served from localStorage with no
+ * server round-trip, so the checkout never queries the DB for the address book.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+    <action name="customer/account/loginPost">
+        <section name="fastcheckout-customer"/>
+    </action>
+    <action name="customer/ajax/login">
+        <section name="fastcheckout-customer"/>
+    </action>
+    <action name="customer/account/logout">
+        <section name="fastcheckout-customer"/>
+    </action>
+    <action name="customer/address/formPost">
+        <section name="fastcheckout-customer"/>
+    </action>
+    <action name="customer/address/delete">
+        <section name="fastcheckout-customer"/>
+    </action>
+    <action name="checkout/onepage/success">
+        <section name="fastcheckout-customer"/>
+    </action>
+</config>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="ParkkTech_FastMagentoCheckout" setup_version="1.0.0">
+        <sequence>
+            <!-- We override the checkout layout/template, so load after core checkout. -->
+            <module name="Magento_Checkout"/>
+            <!--
+                Soft ordering only: <sequence> does not require the module to be present.
+                If FastMagento is installed we load after it; if not, this is a no-op.
+            -->
+            <module name="ParkkTech_FastMagento"/>
+        </sequence>
+    </module>
+</config>

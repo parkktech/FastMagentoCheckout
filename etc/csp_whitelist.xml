@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * FastMagento Checkout — self-contained CSP whitelist.
+ *
+ * Magento MERGES every module's csp_whitelist.xml, so these values are additive. They are
+ * baked into this module deliberately: the instant checkout must work on any store even if
+ * the site's own CSP module (e.g. Jadog_CSP on DIY Offroad) is absent. It covers what the
+ * checkout itself loads — Google Maps/Places (address autocomplete) and the payment gateway
+ * front-ends the payment island boots (Stripe, PayPal, Klarna, Amazon Pay). Value ids are
+ * namespaced `fmc_*` so they never collide with another module's entries for the same host.
+ *
+ * NOTE: `connect-src` for maps.googleapis.com is included here — the Places JS library issues
+ * fetch/XHR to it, which script-src alone does not permit; the site's own whitelist omitted it.
+ */
+-->
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="fmc_google_maps" type="host">maps.googleapis.com</value>
+                <value id="fmc_gstatic" type="host">www.gstatic.com</value>
+                <value id="fmc_stripe_js" type="host">js.stripe.com</value>
+                <value id="fmc_paypal" type="host">www.paypal.com</value>
+                <value id="fmc_paypal_objects" type="host">www.paypalobjects.com</value>
+                <value id="fmc_klarna" type="host">js.klarna.com</value>
+                <value id="fmc_amazon_pay" type="host">static-na.payments-amazon.com</value>
+            </values>
+        </policy>
+
+        <policy id="style-src">
+            <values>
+                <value id="fmc_google_fonts" type="host">fonts.googleapis.com</value>
+            </values>
+        </policy>
+
+        <policy id="img-src">
+            <values>
+                <value id="fmc_google_maps" type="host">maps.googleapis.com</value>
+                <value id="fmc_google_maps_static" type="host">maps.gstatic.com</value>
+                <value id="fmc_gstatic" type="host">www.gstatic.com</value>
+                <value id="fmc_stripe" type="host">q.stripe.com</value>
+                <value id="fmc_paypal" type="host">www.paypalobjects.com</value>
+                <value id="fmc_klarna" type="host">js.klarna.com</value>
+            </values>
+        </policy>
+
+        <policy id="font-src">
+            <values>
+                <value id="fmc_google_fonts" type="host">fonts.gstatic.com</value>
+            </values>
+        </policy>
+
+        <policy id="connect-src">
+            <values>
+                <value id="fmc_google_maps" type="host">maps.googleapis.com</value>
+                <value id="fmc_stripe" type="host">api.stripe.com</value>
+                <value id="fmc_paypal" type="host">www.paypal.com</value>
+                <value id="fmc_klarna" type="host">api.klarna.com</value>
+                <value id="fmc_amazon_pay" type="host">payments-amazon.com</value>
+            </values>
+        </policy>
+
+        <policy id="frame-src">
+            <values>
+                <value id="fmc_stripe" type="host">js.stripe.com</value>
+                <value id="fmc_stripe_checkout" type="host">checkout.stripe.com</value>
+                <value id="fmc_paypal" type="host">www.paypal.com</value>
+                <value id="fmc_google_pay" type="host">pay.google.com</value>
+                <value id="fmc_klarna" type="host">js.klarna.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * GLOBAL scope on purpose: the storefront checkout places orders through the Web API
+ * (/rest/.../payment-information), which runs in the webapi_rest area — a frontend-only observer
+ * would never fire. Registering globally covers checkout, REST and GraphQL order placement.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_place_before">
+        <observer name="fastmagentocheckout_link_guest_order"
+                  instance="ParkkTech\FastMagentoCheckout\Observer\LinkGuestOrderToCustomer"/>
+    </event>
+    <!-- On new registration, claim all past guest orders placed with that email. -->
+    <event name="customer_register_success">
+        <observer name="fastmagentocheckout_claim_guest_orders"
+                  instance="ParkkTech\FastMagentoCheckout\Observer\ClaimGuestOrdersOnRegister"/>
+    </event>
+</config>

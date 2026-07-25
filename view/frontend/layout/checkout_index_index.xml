@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="ParkkTech_FastMagentoCheckout::css/checkout.css"/>
+    </head>
+    <body>
+        <!--
+            Reuse the stock checkout.root block: we only swap its template and hand it a
+            view model. The block keeps its cacheable="false" flag and its jsLayout argument,
+            so nothing about how the config is *built* changes — only when it is delivered.
+        -->
+        <referenceBlock name="checkout.root" template="ParkkTech_FastMagentoCheckout::onepage.phtml">
+            <arguments>
+                <argument name="fast_checkout" xsi:type="object">ParkkTech\FastMagentoCheckout\ViewModel\CheckoutBoot</argument>
+                <argument name="address_form" xsi:type="object">ParkkTech\FastMagentoCheckout\ViewModel\AddressForm</argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

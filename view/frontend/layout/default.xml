@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Site-wide checkout preloader: speculatively loads /checkout when the cart is non-empty. -->
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="fastcheckout.prefetch"
+                   template="ParkkTech_FastMagentoCheckout::prefetch.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

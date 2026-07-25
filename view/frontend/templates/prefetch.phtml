@@ -1,0 +1,16 @@
+<?php
+/**
+ * Mounts the checkout preloader. Renders nothing visible; the JS injects the speculation
+ * rule / prefetch link when the cart has items.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$init = json_encode([
+    'ParkkTech_FastMagentoCheckout/js/checkout-prefetch' => [
+        'checkoutUrl' => $block->getUrl('checkout'),
+    ],
+]);
+?>
+<div data-role="fastcheckout-prefetch"
+     data-mage-init='<?= $block->escapeHtmlAttr($init) ?>'
+     style="display:none"></div>
