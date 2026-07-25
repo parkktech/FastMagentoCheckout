@@ -12,6 +12,14 @@
   <img alt="License" src="https://img.shields.io/badge/license-OSL--3.0%20%2F%20AFL--3.0-blue"/>
 </p>
 
+> [!WARNING]
+> ### ⚠️ Not tested outside of ParkkTech FastMagento
+> This module has **only been tested as a companion to the [ParkkTech FastMagento extension](https://github.com/parkktech/FastMagento)**. It may **require FastMagento to work** — or to deliver its full benefits — and is **not yet proven standalone on base Magento**. Until standalone validation is complete, treat it as a FastMagento add-on and use at your own risk.
+>
+> 👉 **Get the extension it's built for: [github.com/parkktech/FastMagento](https://github.com/parkktech/FastMagento)**
+>
+> ✅ **Running this successfully *without* FastMagento?** Please [let us know](https://github.com/parkktech/FastMagentoCheckout/issues/new) so others can benefit — real-world standalone reports help us certify base-Magento support.
+
 > 🐌➡️🚀 The Magento 2 onepage checkout has a dirty little secret: it isn't really "one page," it's
 > "one giant blob of per-quote JSON your server sweats out **before the browser can paint a single
 > input**." `window.checkoutConfig` shows up carrying every payment method, every totals breakdown,
