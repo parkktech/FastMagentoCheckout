@@ -1,0 +1,34 @@
+name: Update Packagist
+
+# Force Packagist to re-crawl this package whenever its default branch changes — a direct commit,
+# a merged PR, or a subtree-split publish from the monorepo. Reliable replacement for the push
+# webhook (which has proven flaky). Repo-agnostic: uses GITHUB_REPOSITORY, so the same file works
+# for any ParkkTech package repo it is copied into.
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch: {}
+
+jobs:
+  packagist:
+    runs-on: ubuntu-latest
+    environment: PACKAGIST-PROD
+    steps:
+      - name: Notify Packagist of update
+        env:
+          PACKAGIST_USERNAME: ${{ vars.PACKAGIST_USERNAME }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PACKAGIST_USERNAME}" ] || [ -z "${PACKAGIST_TOKEN}" ]; then
+            echo "::error::PACKAGIST_USERNAME (var) or PACKAGIST_KEY (secret) is not set in the PACKAGIST-PROD environment."
+            exit 1
+          fi
+          echo "Notifying Packagist for repo: ${GITHUB_REPOSITORY}"
+          resp="$(curl -fsS -X POST \
+            "https://packagist.org/api/update-package?username=${PACKAGIST_USERNAME}&apiToken=${PACKAGIST_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":{\"url\":\"https://github.com/${GITHUB_REPOSITORY}\"}}")"
+          echo "Packagist response: ${resp}"
+          echo "${resp}" | grep -q '"status":"success"' || { echo "::error::Packagist update did not report success"; exit 1; }
