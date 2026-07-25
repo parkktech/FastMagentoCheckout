@@ -3,8 +3,12 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="Magento_Config::config">
-                    <resource id="ParkkTech_FastMagentoCheckout::config" title="FastMagento Checkout" sortOrder="100"/>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="ParkkTech_FastMagentoCheckout::config" title="FastMagento Checkout" sortOrder="100"/>
+                        </resource>
+                    </resource>
                 </resource>
             </resource>
         </resources>
