@@ -12,6 +12,15 @@
   <img alt="License" src="https://img.shields.io/badge/license-OSL--3.0%20%2F%20AFL--3.0-blue"/>
 </p>
 
+<p align="center">
+  <a href="https://www.diyoffroad.com"><img alt="Live demo" src="https://img.shields.io/badge/%F0%9F%9A%80%20live%20demo-add%20to%20cart%20%2B%20instant%20checkout-ff2d55?style=for-the-badge"/></a>
+</p>
+<p align="center">
+  <strong>See it in production →</strong> add any product to your cart on
+  <a href="https://www.diyoffroad.com"><strong>DIYoffroad.com</strong></a>
+  and watch the checkout paint instantly. <em>Add-to-cart and checkout load are live, real-traffic demos.</em>
+</p>
+
 > [!WARNING]
 > ### ⚠️ Not tested outside of ParkkTech FastMagento
 > This module has **only been tested as a companion to the [ParkkTech FastMagento extension](https://github.com/parkktech/FastMagento)**. It may **require FastMagento to work** — or to deliver its full benefits — and is **not yet proven standalone on base Magento**. Until standalone validation is complete, treat it as a FastMagento add-on and use at your own risk.
