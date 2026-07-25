@@ -86,19 +86,12 @@ $widgetOptions = [
  * skeleton is all-empty/static (safe to cache); the real per-quote data is merged in later by
  * config-loader, preserving object identity so eager modules see the hydrated values.
  */
-$skeleton = <<<script
-    window.checkoutConfig = window.checkoutConfig || {
-        quoteData: {},
-        quoteItemData: [],
-        totalsData: {},
-        paymentMethods: [],
-        priceFormat: {},
-        basePriceFormat: {},
-        storeCode: ''
-    };
-script;
+// Emitted below as a byte-exact PLAIN <script> (not via $secureRenderer) so its content hash is
+// stable and whitelisted in etc/csp_whitelist.xml (id="fmc_skeleton"). That keeps it valid on a
+// Varnish/FPC-cached page even under a strict, nonce-based CSP (a stale cached nonce won't match,
+// but the content hash always will). KEEP THIS STRING AND THE HASH IN SYNC.
 ?>
-<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $skeleton, false) ?>
+<script>window.checkoutConfig=window.checkoutConfig||{quoteData:{},quoteItemData:[],totalsData:{},paymentMethods:[],priceFormat:{},basePriceFormat:{},storeCode:''};</script>
 <div id="checkout"
      class="checkout-container fastcheckout"
      data-mage-init='<?= $block->escapeHtmlAttr(json_encode(['ParkkTech_FastMagentoCheckout/js/checkout' => $widgetOptions])) ?>'>
@@ -241,11 +234,12 @@ script;
 
 <?php
 /*
- * Emit the store-STATIC jsLayout inline (safe to cache — identical for everyone) so the
- * payment island can boot without a second round-trip. The private window.checkoutConfig is
- * deliberately NOT here; the fastCheckout widget fetches it from getConfigUrl().
+ * Store-STATIC payment jsLayout as a NON-executing JSON data island (read by payment-island.js).
+ * A <script type="application/json"> is not subject to CSP script-src, so it is inherently
+ * cache-safe under any policy — no nonce, no hash needed — which is what lets the whole shell be
+ * Varnish/FPC-cacheable. `</` is escaped so no value can prematurely close the tag. The private
+ * per-quote window.checkoutConfig is deliberately NOT here; the widget fetches it from getConfigUrl().
  */
-$jsLayout = /* @noEscape */ $block->getJsLayout();
-$scriptString = "window.fastCheckoutJsLayout = {$jsLayout};";
+$jsLayout = $block->getJsLayout();
 ?>
-<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
+<script type="application/json" id="fastcheckout-jslayout"><?= /* @noEscape */ str_replace('</', '<\/', $jsLayout) ?></script>

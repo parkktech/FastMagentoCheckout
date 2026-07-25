@@ -20,6 +20,29 @@ define(['Magento_Ui/js/core/app'], function (app) {
     var booted = false;
 
     /**
+     * Read the store-static payment jsLayout. Prefers the cache-safe JSON data island
+     * (<script type="application/json" id="fastcheckout-jslayout">) the template now emits;
+     * falls back to a legacy inline window.fastCheckoutJsLayout global if present.
+     *
+     * @return {Object|null}
+     */
+    function readJsLayout() {
+        if (window.fastCheckoutJsLayout) {
+            return window.fastCheckoutJsLayout;
+        }
+        var el = document.getElementById('fastcheckout-jslayout');
+
+        if (el && el.textContent) {
+            try {
+                return JSON.parse(el.textContent);
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Wrap an original container node, keeping its component/config but replacing children.
      *
      * @param {Object} node
@@ -100,10 +123,15 @@ define(['Magento_Ui/js/core/app'], function (app) {
             if (booted) {
                 return;
             }
-            if (typeof window.checkoutConfig === 'undefined' || !window.fastCheckoutJsLayout) {
+            if (typeof window.checkoutConfig === 'undefined') {
                 return;
             }
-            var partial = extractPayment(window.fastCheckoutJsLayout);
+            var jsLayout = readJsLayout();
+
+            if (!jsLayout) {
+                return;
+            }
+            var partial = extractPayment(jsLayout);
 
             if (!partial) {
                 return;

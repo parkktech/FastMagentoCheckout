@@ -9,4 +9,14 @@
             </argument>
         </arguments>
     </type>
+
+    <!--
+        NOTE: Phase 3 (flip the checkout block cacheable for Varnish/FPC) is intentionally NOT wired.
+        Marking the checkout page cacheable triggers Magento's DEPERSONALIZATION, which clears the
+        customer/checkout session (the quote) during render — so payment methods and totals come back
+        empty. Truly caching this route needs a session-free shell render (a dedicated route/block
+        that never touches the checkout session), which is a larger change and must be validated on a
+        real Varnish environment. The cache-SAFE rendering (JSON jsLayout data island + hash-safe
+        skeleton, see onepage.phtml + csp_whitelist.xml) is kept because it is correct regardless.
+    -->
 </config>

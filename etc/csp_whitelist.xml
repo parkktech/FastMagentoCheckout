@@ -19,6 +19,12 @@
     <policies>
         <policy id="script-src">
             <values>
+                <!-- Content hash of the static window.checkoutConfig skeleton inlined in
+                     onepage.phtml. Lets that one inline script run on a Varnish/FPC-cached page
+                     under a strict nonce-based CSP (a stale cached nonce fails, the hash holds).
+                     If you change the skeleton string, recompute:
+                     php -r 'echo base64_encode(hash("sha256", $s, true));' -->
+                <value id="fmc_skeleton" type="hash" algorithm="sha256">vHAnFfOzFh1pOmVWmnmeEr+c2hOs4El6Y/SNJpbZDaU=</value>
                 <value id="fmc_google_maps" type="host">maps.googleapis.com</value>
                 <value id="fmc_gstatic" type="host">www.gstatic.com</value>
                 <value id="fmc_stripe_js" type="host">js.stripe.com</value>
