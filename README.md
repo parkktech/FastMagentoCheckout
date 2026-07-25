@@ -31,12 +31,17 @@ required — and if anything so much as sneezes, it **fails safe to the stock ch
 ## 🚀 Quick install
 
 ```bash
-composer require parkktech/fastmagento-checkout
+composer require parkktech/fastmagento-checkout:^1.0@beta   # beta channel (see note)
 bin/magento module:enable ParkkTech_FastMagentoCheckout
 bin/magento setup:upgrade
 bin/magento setup:di:compile        # production mode only
 bin/magento cache:flush
 ```
+
+> ℹ️ **Currently in beta.** Until a stable `v1.0.0` is tagged, install from the beta channel with
+> the `:^1.0@beta` constraint above (or set `"minimum-stability": "beta"` + `"prefer-stable": true`
+> in your project's `composer.json`). Once `v1.0.0` ships, plain
+> `composer require parkktech/fastmagento-checkout` will resolve it.
 
 Then turn it on: **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout Style →
 _Single-Page Instant_**. It ships **disabled by default** — installing it never changes your
