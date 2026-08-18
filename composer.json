@@ -1,6 +1,6 @@
 {
     "name": "parkktech/fastmagento-checkout",
-    "description": "FastMagento Checkout — makes the Magento 2 onepage checkout paint instantly. Renders a cacheable form shell with a skeleton, then hydrates window.checkoutConfig over an async request so the heavy per-quote config no longer blocks first paint. Optional add-on to FastMagento; works standalone on base Magento (no Hyvä/Breeze required). Fails safe to stock checkout via an admin toggle or ?fastcheckout=0.",
+    "description": "FastMagento Checkout \u2014 makes the Magento 2 onepage checkout paint instantly. Renders a cacheable form shell with a skeleton, then hydrates window.checkoutConfig over an async request so the heavy per-quote config no longer blocks first paint. Optional add-on to FastMagento; works standalone on base Magento (no Hyv\u00e4/Breeze required). Fails safe to stock checkout via an admin toggle or ?fastcheckout=0.",
     "type": "magento2-module",
     "license": [
         "OSL-3.0",
@@ -15,12 +15,13 @@
     ],
     "homepage": "https://github.com/parkktech/FastMagento",
     "require": {
-        "php": ">=8.1",
+        "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0||~8.5.0",
         "magento/framework": ">=103.0.0",
         "magento/module-checkout": ">=100.0.0"
     },
     "suggest": {
-        "parkktech/fastmagento": "Serve catalog, category, search and layered navigation from OpenSearch. FastMagento Checkout works with or without it."
+        "parkktech/fastmagento": "Serve catalog, category, search and layered navigation from OpenSearch. FastMagento Checkout works with or without it.",
+        "hyva-themes/magento2-luma-checkout": "Required when running the Hyva theme: this module extends the Luma checkout.root block, which Hyva's default theme does not render. Free, OSL-3.0."
     },
     "autoload": {
         "files": [

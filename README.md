@@ -53,16 +53,31 @@ bin/magento module:enable ParkkTech_FastMagentoCheckout
 bin/magento setup:upgrade
 bin/magento setup:di:compile        # production mode only
 bin/magento cache:flush
+
+# Fast checkout is ON by default. To fall back to the stock checkout at any time:
+#   bin/magento config:set fastmagentocheckout/general/enabled 0
+# or append ?fastcheckout=0 to a checkout URL for a one-off comparison.
 ```
+
+> ⚠️ **Running Hyvä?** This module renders through the Luma/Knockout `checkout.root` block, which
+> Hyvä's default theme does not output — without the free Luma-checkout fallback it stays inert and
+> you simply get Hyvä's own checkout:
+> ```bash
+> composer require hyva-themes/magento2-luma-checkout
+> ```
+> Not sure what state you're in? Run **`bin/magento fastmagento:doctor`** (ships with
+> `parkktech/fastmagento`) — it reports whether the fast checkout is enabled and whether the Hyvä
+> fallback is present.
 
 > ℹ️ **Currently in beta.** Until a stable `v1.0.0` is tagged, install from the beta channel with
 > the `:^1.0@beta` constraint above (or set `"minimum-stability": "beta"` + `"prefer-stable": true`
 > in your project's `composer.json`). Once `v1.0.0` ships, plain
 > `composer require parkktech/fastmagento-checkout` will resolve it.
 
-Then turn it on: **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout Style →
-_Single-Page Instant_**. It ships **disabled by default** — installing it never changes your
-checkout until you flip the switch. (Full options below.)
+Checkout style lives at **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout
+Style**, and ships as **_Single-Page Instant_**. To go back to the stock checkout, set it to
+_Default (2-Step)_ or `fastmagentocheckout/general/enabled` to `0` — and `?fastcheckout=0` gives you
+a one-off stock render for comparison without changing any config. (Full options below.)
 
 **Requirements:** Magento 2.4.6+, PHP 8.1+. That's it. No search engine, no special theme, no core patches.
 
