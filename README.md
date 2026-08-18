@@ -53,7 +53,22 @@ bin/magento module:enable ParkkTech_FastMagentoCheckout
 bin/magento setup:upgrade
 bin/magento setup:di:compile        # production mode only
 bin/magento cache:flush
+
+# REQUIRED — the module ships DISABLED on purpose so installing it can never swap a
+# live checkout without you deciding to. Until you run this, you get the stock checkout.
+bin/magento config:set fastmagentocheckout/general/enabled 1
+bin/magento cache:flush
 ```
+
+> ⚠️ **Running Hyvä?** This module renders through the Luma/Knockout `checkout.root` block, which
+> Hyvä's default theme does not output — without the free Luma-checkout fallback it stays inert and
+> you simply get Hyvä's own checkout:
+> ```bash
+> composer require hyva-themes/magento2-luma-checkout
+> ```
+> Not sure what state you're in? Run **`bin/magento fastmagento:doctor`** (ships with
+> `parkktech/fastmagento`) — it reports whether the fast checkout is enabled and whether the Hyvä
+> fallback is present.
 
 > ℹ️ **Currently in beta.** Until a stable `v1.0.0` is tagged, install from the beta channel with
 > the `:^1.0@beta` constraint above (or set `"minimum-stability": "beta"` + `"prefer-stable": true`
