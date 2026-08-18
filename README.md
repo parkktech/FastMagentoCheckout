@@ -81,6 +81,70 @@ a one-off stock render for comparison without changing any config. (Full options
 
 **Requirements:** Magento 2.4.6+, PHP 8.1+. That's it. No search engine, no special theme, no core patches.
 
+## 🩺 Troubleshooting — `bin/magento fastmagento:doctor`
+
+Installed but the checkout looks unchanged? Run the doctor (it ships with
+[`parkktech/fastmagento`](https://github.com/parkktech/FastMagento)) — it reports this module's
+state explicitly instead of leaving you to guess:
+
+```bash
+bin/magento fastmagento:doctor
+```
+
+```
+CHECKOUT
+  ✓ Fast checkout                      enabled
+  ✓ Hyvä checkout compatibility        Hyva_LumaCheckout enabled
+  ✓ Checkout theme static content      frontend/Magento/luma deployed for en_US
+```
+
+It tells you whether the fast checkout is actually switched on, and — because this module renders
+through the Luma/Knockout `checkout.root` block that Hyvä's default theme does not output —
+whether the free `hyva-themes/magento2-luma-checkout` fallback is present on any store view running
+Hyvä. Those are the two reasons a correct install still shows the stock checkout.
+
+The third check is the one nobody thinks to look for; it has its own section below.
+
+## ⚠️ On Hyvä, deploy the fallback theme's static content too
+
+This is the single most confusing failure this module has, and it is not a bug in the module.
+
+`hyva-themes/magento2-luma-checkout` brings `Hyva_ThemeFallback`, which **swaps the design theme at
+runtime** for the configured URL segments — `/checkout/index` among them. So your checkout renders
+in a *different theme* (`Magento/luma` by default) from the rest of your storefront, and **that theme
+needs its own deployed static content.**
+
+When it is missing, checkout returns a perfectly healthy **HTTP 200** while every Luma CSS, JS, font
+and image 404s underneath it. RequireJS is one of those 404s, so the Knockout checkout never boots
+either. What you see is an unstyled wall of browser-default text — which looks exactly like a broken
+module, and isn't one.
+
+It is easy to arrive at by accident. A full deploy that dies on some unrelated broken theme can abort
+before it reaches the fallback theme, and the natural workaround — pinning the deploy to your
+storefront theme — skips the fallback theme too, every single time:
+
+```bash
+# ✅ deploys your theme AND the checkout fallback theme
+bin/magento setup:static-content:deploy -f -a frontend --exclude-theme Vendor/broken-theme en_US
+
+# ❌ silently skips Magento/luma — catalogue styled, checkout not
+bin/magento setup:static-content:deploy -f -a frontend --theme Your/theme en_US
+```
+
+Quick check, any time:
+
+```bash
+ls pub/static/frontend/Magento/luma/en_US/css/styles-m.css
+```
+
+If that is missing — or the directory holds only `requirejs-config.js`, which Magento writes there at
+runtime and which therefore proves nothing — the fallback theme was never deployed.
+`fastmagento:doctor` reports exactly this, per store view and locale, with the deploy command to fix
+it.
+
+One more thing worth knowing: once theme fallback is enabled it applies **globally**, so a Luma or
+Breeze storefront routes `/checkout/index` through the fallback too — not just Hyvä.
+
 ## 🤝 The perfect pairing
 
 FastMagento Checkout is a proud member of the **FastMagento** family and the natural other half of
