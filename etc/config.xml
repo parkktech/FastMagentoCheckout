@@ -5,10 +5,12 @@
             <general>
                 <!--
                     Master switch. 0 = stock Magento checkout (inline config), 1 = deferred async config.
-                    Ships DISABLED by default: installing the module must never activate the fast
-                    checkout automatically. Turn it on per-environment only after QA passes.
+                    Default ON: the module exists to make checkout paint instantly, and shipping it
+                    inert meant installs where "nothing happened" was the expected outcome.
+                    Escape hatches remain: set this to 0, or append ?fastcheckout=0 to a checkout
+                    URL, to get the stock checkout back without uninstalling.
                 -->
-                <enabled>0</enabled>
+                <enabled>1</enabled>
                 <!--
                     When a guest checks out with an email that already has an account, attach the
                     order to that account. On by default; turn off to keep such orders as guests.

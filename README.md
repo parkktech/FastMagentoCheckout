@@ -54,10 +54,9 @@ bin/magento setup:upgrade
 bin/magento setup:di:compile        # production mode only
 bin/magento cache:flush
 
-# REQUIRED — the module ships DISABLED on purpose so installing it can never swap a
-# live checkout without you deciding to. Until you run this, you get the stock checkout.
-bin/magento config:set fastmagentocheckout/general/enabled 1
-bin/magento cache:flush
+# Fast checkout is ON by default. To fall back to the stock checkout at any time:
+#   bin/magento config:set fastmagentocheckout/general/enabled 0
+# or append ?fastcheckout=0 to a checkout URL for a one-off comparison.
 ```
 
 > ⚠️ **Running Hyvä?** This module renders through the Luma/Knockout `checkout.root` block, which
@@ -75,9 +74,10 @@ bin/magento cache:flush
 > in your project's `composer.json`). Once `v1.0.0` ships, plain
 > `composer require parkktech/fastmagento-checkout` will resolve it.
 
-Then turn it on: **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout Style →
-_Single-Page Instant_**. It ships **disabled by default** — installing it never changes your
-checkout until you flip the switch. (Full options below.)
+Checkout style lives at **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout
+Style**, and ships as **_Single-Page Instant_**. To go back to the stock checkout, set it to
+_Default (2-Step)_ or `fastmagentocheckout/general/enabled` to `0` — and `?fastcheckout=0` gives you
+a one-off stock render for comparison without changing any config. (Full options below.)
 
 **Requirements:** Magento 2.4.6+, PHP 8.1+. That's it. No search engine, no special theme, no core patches.
 
