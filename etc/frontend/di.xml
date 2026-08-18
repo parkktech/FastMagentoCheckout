@@ -11,6 +11,19 @@
     </type>
 
     <!--
+        Theme fallback renders checkout in a different theme from the storefront, and Magento's logo
+        block resolves its default logo against whichever theme is rendering — so a store with no
+        uploaded logo shows the storefront theme's mark everywhere and the fallback theme's stock
+        mark at checkout. This lends the configured storefront theme's logo to the fallback. See the
+        plugin; it no-ops when a logo has been uploaded or no swap is in play.
+    -->
+    <type name="Magento\Theme\Block\Html\Header\Logo">
+        <plugin name="fastmagentocheckout_header_logo_theme"
+                type="ParkkTech\FastMagentoCheckout\Plugin\HeaderLogoThemePlugin"
+                sortOrder="10"/>
+    </type>
+
+    <!--
         NOTE: Phase 3 (flip the checkout block cacheable for Varnish/FPC) is intentionally NOT wired.
         Marking the checkout page cacheable triggers Magento's DEPERSONALIZATION, which clears the
         customer/checkout session (the quote) during render — so payment methods and totals come back
