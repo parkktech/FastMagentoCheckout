@@ -48,7 +48,7 @@ required — and if anything so much as sneezes, it **fails safe to the stock ch
 ## 🚀 Quick install
 
 ```bash
-composer require parkktech/fastmagento-checkout:^1.0@beta   # beta channel (see note)
+composer require parkktech/fastmagento-checkout
 bin/magento module:enable ParkkTech_FastMagentoCheckout
 bin/magento setup:upgrade
 bin/magento setup:di:compile        # production mode only
@@ -69,10 +69,9 @@ bin/magento cache:flush
 > `parkktech/fastmagento`) — it reports whether the fast checkout is enabled and whether the Hyvä
 > fallback is present.
 
-> ℹ️ **Currently in beta.** Until a stable `v1.0.0` is tagged, install from the beta channel with
-> the `:^1.0@beta` constraint above (or set `"minimum-stability": "beta"` + `"prefer-stable": true`
-> in your project's `composer.json`). Once `v1.0.0` ships, plain
-> `composer require parkktech/fastmagento-checkout` will resolve it.
+> ✅ **Stable since v1.0.0.** No stability flags needed — a plain `composer require` resolves it.
+> Verified end to end on Hyvä, Luma and Swissup Breeze: catalogue, product page, cart, checkout and
+> a placed order on each.
 
 Checkout style lives at **Stores → Configuration → ParkkTech → FastMagento Checkout → Checkout
 Style**, and ships as **_Single-Page Instant_**. To go back to the stock checkout, set it to
@@ -104,6 +103,22 @@ whether the free `hyva-themes/magento2-luma-checkout` fallback is present on any
 Hyvä. Those are the two reasons a correct install still shows the stock checkout.
 
 The third check is the one nobody thinks to look for; it has its own section below.
+
+## 🎨 Your logo follows the shopper into checkout
+
+Theme fallback renders checkout in a different theme, and Magento only reaches for a theme's own
+`images/logo.svg` as a last resort — resolved against **whichever theme is rendering**. So a store
+that has never uploaded a logo shows its storefront theme's mark on every page, then the fallback
+theme's stock mark at the moment of payment. On a Breeze storefront that is a literal "BREEZE"
+wordmark everywhere and a "LUMA" one at checkout.
+
+This module resolves the same asset against the theme the store is **configured** to use, so the
+fallback theme borrows the storefront's logo and nothing else changes. Your themes keep their own
+branding; only the checkout follows.
+
+It deliberately does nothing when a logo has been uploaded (`design/header/logo_src`) — that is
+already theme-independent and the merchant's explicit choice outranks ours — when no theme swap is
+in play, or when the configured theme ships no logo of its own.
 
 ## ⚠️ On Hyvä, deploy the fallback theme's static content too
 

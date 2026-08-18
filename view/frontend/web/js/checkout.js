@@ -170,6 +170,105 @@ define([
                     }
                 });
             }
+
+            this.wirePlaceOrderFocus();
+        },
+
+        /**
+         * Take the shopper to the field that is stopping the order.
+         *
+         * Place Order is rendered by the stock Knockout payment component, and when its validation
+         * fails it marks the offending field and stops — but the page does not move. On this
+         * single-page checkout the payment step sits well below the address, so a shopper who
+         * missed the email at the very top clicks Place Order, sees nothing happen, and has no way
+         * of knowing why. That is the single easiest place to lose an order.
+         *
+         * Bound in the CAPTURE phase on document, so it runs whichever component owns the button
+         * and survives the payment section re-rendering. It never blocks the click — validation
+         * still belongs to the payment component; this only moves the viewport afterwards.
+         */
+        wirePlaceOrderFocus: function () {
+            var self = this;
+
+            document.addEventListener('click', function (e) {
+                var btn = e.target && e.target.closest
+                    ? e.target.closest('button.action.primary.checkout, button[data-role="place-order"]')
+                    : null;
+
+                if (!btn) {
+                    return;
+                }
+
+                // Flag anything empty up front: the stock validator only knows about its own
+                // fields, and the email in particular lives outside the address form.
+                self.markMissingRequired();
+
+                // After the payment component has had a turn to render its own errors.
+                setTimeout(function () { self.focusFirstInvalid(); }, 120);
+            }, true);
+        },
+
+        /**
+         * Mark every empty required field, including the email outside the address form.
+         */
+        markMissingRequired: function () {
+            var self = this,
+                isEmpty = function (el) { return !el || !el.value || !el.value.trim(); };
+
+            if (this.el.form) {
+                this.el.form.querySelectorAll('input[name], select[name]').forEach(function (el) {
+                    if (self.isFieldRequired(el) && isEmpty(el)) {
+                        el.classList.add('fc-invalid');
+                    }
+                });
+            }
+            if (this.el.email && !window.isCustomerLoggedIn && isEmpty(this.el.email)) {
+                this.el.email.classList.add('fc-invalid');
+            }
+        },
+
+        /**
+         * Scroll the first problem field into view and focus it.
+         *
+         * Looks for our own `fc-invalid` marker and for the stock validator's `mage-error` state,
+         * so it lands on whichever noticed first, and walks the DOM in document order so the
+         * shopper is always sent to the EARLIEST problem rather than an arbitrary one.
+         */
+        focusFirstInvalid: function () {
+            var candidates = document.querySelectorAll(
+                    '.fc-invalid, .mage-error, input[aria-invalid="true"], select[aria-invalid="true"]'
+                ),
+                target = null,
+                i;
+
+            for (i = 0; i < candidates.length; i++) {
+                var el = candidates[i];
+
+                // `mage-error` is usually the message element, not the field — hop to the input.
+                if (el.classList.contains('mage-error') && !el.matches('input, select, textarea')) {
+                    el = el.parentElement
+                        ? el.parentElement.querySelector('input, select, textarea')
+                        : null;
+                }
+                if (el && el.offsetParent !== null) { // skip anything hidden
+                    target = el;
+                    break;
+                }
+            }
+
+            if (!target) {
+                return;
+            }
+
+            try {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (err) {
+                target.scrollIntoView();
+            }
+            // Focus after the scroll starts, so the browser does not fight it with its own jump.
+            setTimeout(function () {
+                try { target.focus({ preventScroll: true }); } catch (err) { target.focus(); }
+            }, 300);
         },
 
         /**
