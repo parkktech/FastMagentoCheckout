@@ -1,0 +1,38 @@
+name: GitHub Release
+
+# Keep the Releases page in step with the version tags (and Packagist): every v* tag gets a
+# GitHub Release. Runs on a tag push and on pushes to main, so a tag created before this
+# workflow existed, or one whose release step failed, is picked up on the next push.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create missing GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          existing="$(gh release list --repo "$REPO" --limit 1000 --json tagName --jq '.[].tagName')"
+          gh api "repos/$REPO/tags" --paginate --jq '.[].name' | grep -E '^v[0-9]' | sort -V | while read -r tag; do
+            if printf '%s\n' "$existing" | grep -qxF "$tag"; then
+              continue
+            fi
+            prerelease=""
+            case "$tag" in *-*) prerelease="--prerelease" ;; esac
+            echo "Creating release $tag"
+            gh release create "$tag" --repo "$REPO" --title "$tag" --generate-notes --verify-tag $prerelease
+          done
