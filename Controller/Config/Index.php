@@ -7,6 +7,7 @@ use Magento\Checkout\Block\Onepage;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\LayoutInterface;
 use Psr\Log\LoggerInterface;
 
@@ -63,6 +64,12 @@ class Index implements HttpGetActionInterface
             /** @var Onepage $block */
             $block = $this->layout->createBlock(Onepage::class);
             $result->setData($block->getCheckoutConfig());
+        } catch (NoSuchEntityException $e) {
+            // No active cart for this session (a bot, an expired session, or a direct hit on the
+            // URL). Nothing is broken, so don't log a critical error; the client still gets
+            // `error` and degrades to stock checkout as it would for any failed load.
+            $result->setHttpResponseCode(404);
+            $result->setData(['error' => true, 'reason' => 'no_cart']);
         } catch (\Throwable $e) {
             // Never leak a partial/invalid config: signal failure so the client
             // degrades to stock checkout instead of booting on bad data.
